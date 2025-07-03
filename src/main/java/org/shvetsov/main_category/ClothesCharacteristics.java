@@ -1,0 +1,29 @@
+package org.shvetsov.main_category;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import org.shvetsov.models.ProductCharacteristics;
+
+@Entity
+@DiscriminatorValue("CLOTHES")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+public class ClothesCharacteristics extends ProductCharacteristics {
+
+    @Column(name = "size")
+    private String size;
+
+    @Column(name = "material")
+    private String material;
+
+    @Column(name = "gender")
+    private Gender gender;
+}
