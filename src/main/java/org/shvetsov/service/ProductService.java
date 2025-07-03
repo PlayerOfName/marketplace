@@ -1,0 +1,129 @@
+package org.shvetsov.service;
+
+import jakarta.persistence.LockModeType;
+import org.modelmapper.ModelMapper;
+import org.shvetsov.DTO.ProductAndCharacteristicsRQ;
+import org.shvetsov.DTO.ProductCharacteristicsRQ;
+import org.shvetsov.DTO.ProductRQ;
+import org.shvetsov.main_category.*;
+import org.shvetsov.mapper.ProductMapper;
+import org.shvetsov.models.Comment;
+import org.shvetsov.models.Product;
+import org.shvetsov.models.ProductCharacteristics;
+import org.shvetsov.repositories.ProductRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
+
+import static org.shvetsov.main_category.ProductCategory.*;
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+
+@Service
+public class ProductService {
+    private final ProductRepository productRepository;
+    private final ProductCharacteristicsService productCharacteristicsService;
+    private final ModelMapper modelMapper;
+    private final ProductMapper productMapper;
+
+    public ProductService(ProductRepository productRepository, ProductCharacteristicsService productCharacteristicsService, ModelMapper modelMapper, ProductMapper productMapper) {
+        this.productRepository = productRepository;
+        this.productCharacteristicsService = productCharacteristicsService;
+        this.modelMapper = modelMapper;
+        this.productMapper = productMapper;
+    }
+
+    public Product createProductAndCharacteristics(ProductAndCharacteristicsRQ productRQ) {
+        Product product = Product.builder()
+                .name(productRQ.getName())
+                .description(productRQ.getDescription())
+                .price(productRQ.getPrice())
+                .overallRating(productRQ.getOverallRating())
+                .categories(valueOf(productRQ.getCategories().toUpperCase()))
+                .creatorId(productRQ.getCreatorId())
+                .build();
+
+        ProductCharacteristics characteristics = switch (product.getCategories()) {
+            case ELECTRONICS -> productCharacteristicsService.createElectronicProduct(productRQ.getCharacteristics());
+            case CLOTHES -> productCharacteristicsService.createClotheProduct(productRQ.getCharacteristics());
+            case HOUSEHOLD -> productCharacteristicsService.createHouseholdProduct(productRQ.getCharacteristics());
+            case CHANCELLERY -> productCharacteristicsService.createChancelleryProduct(productRQ.getCharacteristics());
+        };
+
+        characteristics.setProduct(product);
+        product.setCharacteristics(characteristics);
+
+        productRepository.save(product);
+        return product;
+    }
+
+    public Product createProduct(ProductRQ productRQ) {
+        Product product = Product.builder()
+                .name(productRQ.getName())
+                .description(productRQ.getDescription())
+                .price(productRQ.getPrice())
+                .categories(valueOf(productRQ.getCategories().toUpperCase()))
+                .creatorId(productRQ.getCreatorId())
+                .build();
+
+        productRepository.save(product);
+        return product;
+    }
+
+    public Product updateProduct(UUID id, ProductRQ productRQ, Long userId) {
+        if (productRepository.findById(id).get().getCreatorId() != userId) {
+            throw new RuntimeException("You don't have permission to update this product");
+        }
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        productMapper.updateProduct(productRQ, product);
+        return productRepository.save(product);
+
+    }
+
+    public void updateOverallRating(UUID id) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        List<Comment> comments = product.getComments();
+        if (!comments.isEmpty()) {
+            double averageRating = comments.stream().mapToInt(Comment::getRating).average().orElse(0.0);
+            product.setOverallRating(averageRating);
+            productRepository.save(product);
+        }
+
+    }
+
+    public UUID deleteProduct(UUID productId, Long userId) {
+        if (productRepository.findById(productId).get().getCreatorId() != userId) {
+            return null;
+        }
+        productRepository.deleteById(productId);
+        return productId;
+    }
+
+    public List<Product> getProductByFilter(String name, String description, String category, Double price, Double overallRating, Long creatorId) {
+        List<Product> products = productRepository.findAll();
+        if (name != null) {
+            products = products.stream().filter(product -> product.getName().contains(name)).toList();
+        }
+        if (description != null) {
+            products = products.stream().filter(product -> product.getDescription().contains(description)).toList();
+        }
+        if (category != null) {
+            products = products.stream().filter(product -> product.getCategories().toString().equals(category)).toList();
+        }
+        if (price != null) {
+            products = products.stream().filter(product -> product.getPrice().equals(price)).toList();
+        }
+        if (overallRating != null) {
+            products = products.stream().filter(product -> product.getOverallRating() != null && product.getOverallRating().equals(overallRating)).toList();
+        }
+        if (creatorId != null) {
+            products = products.stream().filter(product -> product.getCreatorId() == creatorId).toList();
+        }
+        return products;
+    }
+
+    public Product getProduct(UUID id) {
+        return productRepository.findById(id).get();
+    }
+}
