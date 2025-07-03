@@ -1,0 +1,4 @@
+package org.shvetsov.mapper;
+
+public interface ProductCharacteristics {
+}
