@@ -1,11 +1,10 @@
-package org.shvetsov.main_category;
+package org.shvetsov.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.shvetsov.models.ProductCharacteristics;
 
 @Entity
 @DiscriminatorValue("ELECTRONICS")

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1751809572382-1" author="shvets">
+        <createTable tableName="comment">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_comment"/>
+            </column>
+            <column name="rating" type="INT"/>
+            <column name="text" type="VARCHAR(255)"/>
+            <column name="product_id" type="UUID"/>
+            <column name="author_id" type="UUID"/>
+            <column name="created_at" type="DATETIME"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1751809572382-2" author="shvets">
+        <createTable tableName="product">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_product"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="category" type="VARCHAR(255)"/>
+            <column name="price" type="DOUBLE"/>
+            <column name="overall_rating" type="java.math.BigDecimal"/>
+            <column name="creator_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1751809572382-3" author="shvets">
+        <createTable tableName="product_characteristics">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_product_characteristics"/>
+            </column>
+            <column name="spec_type" type="VARCHAR(31)"/>
+            <column name="weight" type="DOUBLE"/>
+            <column name="height" type="DOUBLE"/>
+            <column name="width" type="DOUBLE"/>
+            <column name="product_id" type="UUID"/>
+            <column name="room_type" type="VARCHAR(255)"/>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="power" type="DOUBLE"/>
+            <column name="warranty_months" type="INT"/>
+            <column name="remote_control" type="BOOLEAN"/>
+            <column name="size" type="VARCHAR(255)"/>
+            <column name="material" type="VARCHAR(255)"/>
+            <column name="gender" type="SMALLINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1751809572382-4" author="shvets">
+        <addUniqueConstraint columnNames="author_id" constraintName="uc_comment_author" tableName="comment"/>
+    </changeSet>
+    <changeSet id="1751809572382-5" author="shvets">
+        <addUniqueConstraint columnNames="product_id" constraintName="uc_product_characteristics_product"
+                             tableName="product_characteristics"/>
+    </changeSet>
+    <changeSet id="1751809572382-6" author="shvets">
+        <addForeignKeyConstraint baseColumnNames="product_id" baseTableName="product_characteristics"
+                                 constraintName="FK_PRODUCT_CHARACTERISTICS_ON_PRODUCT" referencedColumnNames="id"
+                                 referencedTableName="product"/>
+    </changeSet>
+
+</databaseChangeLog>

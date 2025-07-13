@@ -1,4 +1,4 @@
-package org.shvetsov.main_category;
+package org.shvetsov.models;
 
 public enum Gender {
     MALE,

@@ -1,8 +1,9 @@
 package org.shvetsov.controllers;
 
-import lombok.Getter;
-import org.shvetsov.DTO.ProductAndCharacteristicsRQ;
-import org.shvetsov.DTO.ProductRQ;
+import org.shvetsov.models.DTO.FilterRQ;
+import org.shvetsov.models.DTO.ProductAndCharacteristicsRQ;
+import org.shvetsov.models.DTO.ProductRQ;
+import org.shvetsov.models.DTO.ProductRS;
 import org.shvetsov.models.Product;
 import org.shvetsov.service.ProductService;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +33,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/delete/{productId}")
-    public ResponseEntity<UUID> deleteProduct(@PathVariable(value = "productId") UUID productId, @RequestHeader("X-User-Id") Long userId) {
+    public ResponseEntity<UUID> deleteProduct(@PathVariable(value = "productId") UUID productId, @RequestHeader("X-User-Id") UUID userId) {
         if (productService.deleteProduct(productId, userId) == null) {
             return ResponseEntity.status(403).build();
         } else {
@@ -41,24 +42,17 @@ public class ProductController {
     }
 
     @PatchMapping("/update/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable UUID id, @RequestBody ProductRQ productRQ, @RequestHeader("X-User-Id") Long userId) {
+    public ResponseEntity<Product> updateProduct(@PathVariable UUID id, @RequestBody ProductRQ productRQ, @RequestHeader("X-User-Id") UUID userId) {
         return ResponseEntity.ok(productService.updateProduct(id, productRQ, userId));
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<Product> getProduct(@PathVariable UUID id) {
-        return ResponseEntity.ok(productService.getProduct(id));
+    public ResponseEntity<ProductRS> getProduct(@PathVariable UUID id) {
+        return ResponseEntity.ok(productService.getProductWithDetails(id));
     }
 
     @GetMapping("/getbyfilter")
-    public ResponseEntity<List<Product>> getProductByFilter(
-            @RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "category", required = false) String category,
-            @RequestParam(value = "price", required = false) Double price,
-            @RequestParam(value = "overall_rating", required = false) Double overallRating,
-            @RequestParam(value = "creator_id", required = false) Long creatorId
-            ) {
-        return ResponseEntity.ok(productService.getProductByFilter(name, description, category, price, overallRating, creatorId));
+    public ResponseEntity<List<Product>> getProductByFilter(@RequestParam FilterRQ filter) {
+        return ResponseEntity.ok(productService.getProductByFilter(filter));
     }
 }

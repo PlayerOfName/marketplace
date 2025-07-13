@@ -1,0 +1,12 @@
+spring:
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog.xml
+  profiles:
+    active: prod
+
+# Общие настройки для всех профилей
+logging:
+  level:
+    root: INFO
+

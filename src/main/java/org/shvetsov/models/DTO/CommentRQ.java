@@ -1,4 +1,4 @@
-package org.shvetsov.DTO;
+package org.shvetsov.models.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,6 +15,6 @@ import java.util.UUID;
 public class CommentRQ {
     private Integer rating;
     private String text;
-    private Long authorId;
+    private UUID authorId;
     private UUID productId;
 }

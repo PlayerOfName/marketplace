@@ -1,45 +1,35 @@
 package org.shvetsov.service;
 
-import jakarta.persistence.LockModeType;
-import org.modelmapper.ModelMapper;
-import org.shvetsov.DTO.ProductAndCharacteristicsRQ;
-import org.shvetsov.DTO.ProductCharacteristicsRQ;
-import org.shvetsov.DTO.ProductRQ;
-import org.shvetsov.main_category.*;
+import lombok.RequiredArgsConstructor;
 import org.shvetsov.mapper.ProductMapper;
-import org.shvetsov.models.Comment;
+import org.shvetsov.models.DTO.*;
 import org.shvetsov.models.Product;
 import org.shvetsov.models.ProductCharacteristics;
+import org.shvetsov.models.DTO.ProductQuerySpecifications;
 import org.shvetsov.repositories.ProductRepository;
-import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
-import static org.shvetsov.main_category.ProductCategory.*;
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+import static org.shvetsov.models.ProductCategory.*;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductCharacteristicsService productCharacteristicsService;
-    private final ModelMapper modelMapper;
     private final ProductMapper productMapper;
-
-    public ProductService(ProductRepository productRepository, ProductCharacteristicsService productCharacteristicsService, ModelMapper modelMapper, ProductMapper productMapper) {
-        this.productRepository = productRepository;
-        this.productCharacteristicsService = productCharacteristicsService;
-        this.modelMapper = modelMapper;
-        this.productMapper = productMapper;
-    }
 
     public Product createProductAndCharacteristics(ProductAndCharacteristicsRQ productRQ) {
         Product product = Product.builder()
                 .name(productRQ.getName())
                 .description(productRQ.getDescription())
                 .price(productRQ.getPrice())
-                .overallRating(productRQ.getOverallRating())
                 .categories(valueOf(productRQ.getCategories().toUpperCase()))
                 .creatorId(productRQ.getCreatorId())
                 .build();
@@ -71,7 +61,7 @@ public class ProductService {
         return product;
     }
 
-    public Product updateProduct(UUID id, ProductRQ productRQ, Long userId) {
+    public Product updateProduct(UUID id, ProductRQ productRQ, UUID userId) {
         if (productRepository.findById(id).get().getCreatorId() != userId) {
             throw new RuntimeException("You don't have permission to update this product");
         }
@@ -81,7 +71,7 @@ public class ProductService {
 
     }
 
-    public void updateOverallRating(UUID id) {
+/*    public void updateOverallRating(UUID id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
         List<Comment> comments = product.getComments();
         if (!comments.isEmpty()) {
@@ -90,9 +80,9 @@ public class ProductService {
             productRepository.save(product);
         }
 
-    }
+    }*/
 
-    public UUID deleteProduct(UUID productId, Long userId) {
+    public UUID deleteProduct(UUID productId, UUID userId) {
         if (productRepository.findById(productId).get().getCreatorId() != userId) {
             return null;
         }
@@ -100,30 +90,73 @@ public class ProductService {
         return productId;
     }
 
-    public List<Product> getProductByFilter(String name, String description, String category, Double price, Double overallRating, Long creatorId) {
+    public List<Product> getProductByFilter(FilterRQ filterRQ) {
         List<Product> products = productRepository.findAll();
-        if (name != null) {
-            products = products.stream().filter(product -> product.getName().contains(name)).toList();
-        }
-        if (description != null) {
-            products = products.stream().filter(product -> product.getDescription().contains(description)).toList();
-        }
-        if (category != null) {
-            products = products.stream().filter(product -> product.getCategories().toString().equals(category)).toList();
-        }
-        if (price != null) {
-            products = products.stream().filter(product -> product.getPrice().equals(price)).toList();
-        }
-        if (overallRating != null) {
-            products = products.stream().filter(product -> product.getOverallRating() != null && product.getOverallRating().equals(overallRating)).toList();
-        }
-        if (creatorId != null) {
-            products = products.stream().filter(product -> product.getCreatorId() == creatorId).toList();
-        }
+
         return products;
     }
 
-    public Product getProduct(UUID id) {
-        return productRepository.findById(id).get();
+    public ProductRS getProductWithDetails(UUID id) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        ProductRS productRS = ProductRS.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .categories(product.getCategories())
+                .price(product.getPrice())
+                .overallRating(product.getOverallRating())
+                .creatorId(product.getCreatorId())
+                .build();
+
+        if (product.getComments() != null) {
+            productRS.setComments(product.getComments().stream().map(comment -> CommentRS.builder()
+                    .text(comment.getText())
+                    .rating(comment.getRating())
+                    .build()).toList());
+        }
+
+        if (product.getCharacteristics() != null) {
+            productRS.setCharacteristics(ProductCharacteristicsRS.builder()
+                    .weight(product.getCharacteristics().getWeight())
+                    .height(product.getCharacteristics().getHeight())
+                    .width(product.getCharacteristics().getWidth())
+                    .build());
+        }
+
+        return productRS;
+        // изначально проверить категорию через switch или if
     }
+
+    @Transactional(readOnly = true)
+    public Page<ProductRS> getFilteredProducts(FilterRQ filter, Pageable pageable) {
+        Specification<Product> spec = (root, query, cb) -> null;
+
+        // Базовые фильтры
+        if (filter.getName() != null) {
+            spec = spec.and(ProductQuerySpecifications.nameContains(filter.getName()));
+        }
+        if (filter.getMinPrice() != null || filter.getMaxPrice() != null) {
+            spec = spec.and(ProductQuerySpecifications.priceBetween(filter.getMinPrice(), filter.getMaxPrice()));
+        }
+        if (filter.getCategory() != null) {
+            spec = spec.and(ProductQuerySpecifications.categoryEquals(filter.getCategory()));
+        }
+
+        // Фильтры характеристик
+        if (filter.getWeight() != null) {
+            spec = spec.and(ProductQuerySpecifications.weightEquals(filter.getWeight()));
+        }
+
+        if (filter.getWidth() != null) {
+            spec = spec.and(ProductQuerySpecifications.widthEquals(filter.getWidth()));
+        }
+
+        if (filter.getHeight() != null) {
+            spec = spec.and(ProductQuerySpecifications.heightEquals(filter.getHeight()));
+        }
+
+        return productRepository.findAll(spec, pageable)
+                .map(product -> productMapper.toProductRS(product));
+    }
+
 }

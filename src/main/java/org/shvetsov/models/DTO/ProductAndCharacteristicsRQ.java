@@ -1,10 +1,12 @@
-package org.shvetsov.DTO;
+package org.shvetsov.models.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.shvetsov.models.ProductCharacteristics;
+
+import java.math.BigDecimal;
+import java.util.UUID;
 
 
 @Getter
@@ -15,8 +17,8 @@ public class ProductAndCharacteristicsRQ {
     private String name;
     private String description;
     private String categories;
-    private Double price;
+    private BigDecimal price;
     private Double overallRating;
-    private Long creatorId;
+    private UUID creatorId;
     private ProductCharacteristicsRQ characteristics;
 }

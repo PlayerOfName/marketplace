@@ -1,4 +1,4 @@
-package org.shvetsov.main_category;
+package org.shvetsov.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -8,16 +8,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import org.shvetsov.models.ProductCharacteristics;
 
 @Entity
-@DiscriminatorValue("CHANCELLERY")
+@DiscriminatorValue("HOUSEHOLD")
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class ChancelleryCharacteristics extends ProductCharacteristics {
-    @Column(name = "type")
-    private String type;
+public class HouseholdCharacteristics extends ProductCharacteristics {
+    @Column(name = "room_type")
+    private String roomType;
 }

@@ -1,8 +1,7 @@
 package org.shvetsov.service;
 
-import org.shvetsov.DTO.ProductCharacteristicsRQ;
-import org.shvetsov.main_category.*;
-import org.shvetsov.models.ProductCharacteristics;
+import org.shvetsov.models.DTO.ProductCharacteristicsRQ;
+import org.shvetsov.models.*;
 import org.springframework.stereotype.Service;
 
 @Service

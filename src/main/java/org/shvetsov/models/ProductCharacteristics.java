@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
+import java.util.UUID;
+
 @Entity
 @Getter
 @Setter
@@ -15,21 +18,20 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "product_characteristics")
 public class ProductCharacteristics {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "UUID")
     @Column(name = "id")
-    private Long id;
+    private UUID id;
 
     @Column(name = "weight")
-    private Double weight;
+    private BigDecimal weight;
 
     @Column(name = "height")
-    private Double height;
+    private BigDecimal height;
 
     @Column(name = "width")
-    private Double width;
+    private BigDecimal width;
 
     @OneToOne
     @JoinColumn(name = "product_id")
     private Product product;
-
 }

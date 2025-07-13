@@ -1,6 +1,6 @@
 package org.shvetsov.controllers;
 
-import org.shvetsov.DTO.CommentRQ;
+import org.shvetsov.models.DTO.CommentRQ;
 import org.shvetsov.models.Comment;
 import org.shvetsov.service.CommentService;
 import org.springframework.http.ResponseEntity;

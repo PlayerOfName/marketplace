@@ -3,6 +3,19 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+.env
+*.env
+
+# Временные/резервные файлы редакторов
+*~
+*.swp
+*.swo
+*.bak
+*.tmp
+application-dev.yaml
+# Файлы сборки (для Maven/Gradle)
+out/
+bin/
 
 ### STS ###
 .apt_generated
@@ -16,7 +29,6 @@ target/
 ### IntelliJ IDEA ###
 .idea
 *.iws
-*.iml
 *.ipr
 
 ### NetBeans ###

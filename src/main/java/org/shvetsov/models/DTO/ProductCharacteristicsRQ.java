@@ -1,10 +1,11 @@
-package org.shvetsov.DTO;
+package org.shvetsov.models.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 @Getter
@@ -12,9 +13,9 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductCharacteristicsRQ {
-    private Double weight;
-    private Double height;
-    private Double width;
+    private BigDecimal weight;
+    private BigDecimal height;
+    private BigDecimal width;
 
     private Map<String, Object> specification;
 }
