@@ -1,12 +1,8 @@
-package org.shvetsov.models.DTO;
+package org.shvetsov.models;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
-import org.shvetsov.models.ElectronicsCharacteristics;
-import org.shvetsov.models.HouseholdCharacteristics;
-import org.shvetsov.models.Product;
-import org.shvetsov.models.ProductCharacteristics;
 import org.springframework.data.jpa.domain.Specification;
 
 

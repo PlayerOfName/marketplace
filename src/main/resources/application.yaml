@@ -3,7 +3,12 @@ spring:
     enabled: true
     change-log: classpath:db/changelog.xml
   profiles:
-    active: prod
+    active: dev
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+      dialect: org.hibernate.dialect.PostgreSQLDialect
 
 # Общие настройки для всех профилей
 logging:

@@ -12,7 +12,6 @@ target/
 *.swo
 *.bak
 *.tmp
-application-dev.yaml
 # Файлы сборки (для Maven/Gradle)
 out/
 bin/

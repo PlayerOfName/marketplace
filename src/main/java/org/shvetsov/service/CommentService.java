@@ -1,10 +1,10 @@
 package org.shvetsov.service;
 
 
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.shvetsov.models.DTO.CommentRQ;
+import org.shvetsov.mapper.CommentMapper;
+import org.shvetsov.requestApi.CommentRQ;
 import org.shvetsov.models.Comment;
 import org.shvetsov.models.Product;
 import org.shvetsov.repositories.CommentRepository;
@@ -17,17 +17,18 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final ProductRepository productRepository;
-    private final EntityManager entityManager;
+    private final CommentMapper commentMapper;
 
     @Transactional
     public Comment createComment(CommentRQ commentRQ) {
         Product product = productRepository.findById(commentRQ.getProductId()).orElseThrow(() -> new RuntimeException("Product not found"));
-        Comment comment = Comment.builder()
+/*        Comment comment = Comment.builder()
                 .rating(commentRQ.getRating())
                 .text(commentRQ.getText())
                 .product(product)
                 .authorId(commentRQ.getAuthorId())
-                .build();
+                .build();*/
+        Comment comment = commentMapper.toComment(commentRQ);
         commentRepository.save(comment);
         return comment;
     }

@@ -2,31 +2,33 @@ package org.shvetsov.service;
 
 import lombok.RequiredArgsConstructor;
 import org.shvetsov.mapper.ProductMapper;
-import org.shvetsov.models.DTO.*;
 import org.shvetsov.models.Product;
 import org.shvetsov.models.ProductCharacteristics;
-import org.shvetsov.models.DTO.ProductQuerySpecifications;
+import org.shvetsov.models.ProductQuerySpecifications;
+import org.shvetsov.repositories.ProductCharacteristicsRepository;
 import org.shvetsov.repositories.ProductRepository;
+import org.shvetsov.requestApi.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+
 import java.util.List;
 import java.util.UUID;
-
-import static org.shvetsov.models.ProductCategory.*;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
+    private final ProductCharacteristicsRepository productCharacteristicsRepository;
     private final ProductRepository productRepository;
     private final ProductCharacteristicsService productCharacteristicsService;
     private final ProductMapper productMapper;
 
     public Product createProductAndCharacteristics(ProductAndCharacteristicsRQ productRQ) {
-        Product product = Product.builder()
+/*        Product product = Product.builder()
                 .name(productRQ.getName())
                 .description(productRQ.getDescription())
                 .price(productRQ.getPrice())
@@ -45,20 +47,20 @@ public class ProductService {
         product.setCharacteristics(characteristics);
 
         productRepository.save(product);
-        return product;
-    }
-
-    public Product createProduct(ProductRQ productRQ) {
-        Product product = Product.builder()
-                .name(productRQ.getName())
-                .description(productRQ.getDescription())
-                .price(productRQ.getPrice())
-                .categories(valueOf(productRQ.getCategories().toUpperCase()))
-                .creatorId(productRQ.getCreatorId())
-                .build();
-
+        return product;*/
+        Product product = productMapper.toProduct(productRQ);
+        ProductCharacteristics characteristics = switch (product.getCategories()) {
+            case ELECTRONICS -> productCharacteristicsService.createElectronicProduct(productRQ.getCharacteristics());
+            case CLOTHES -> productCharacteristicsService.createClotheProduct(productRQ.getCharacteristics());
+            case HOUSEHOLD -> productCharacteristicsService.createHouseholdProduct(productRQ.getCharacteristics());
+            case CHANCELLERY -> productCharacteristicsService.createChancelleryProduct(productRQ.getCharacteristics());
+        };
+        characteristics.setProduct(product);
+        product.setCharacteristics(characteristics);
         productRepository.save(product);
         return product;
+
+        // отдольно характеристики, отдельно продукт
     }
 
     public Product updateProduct(UUID id, ProductRQ productRQ, UUID userId) {
@@ -98,7 +100,7 @@ public class ProductService {
 
     public ProductRS getProductWithDetails(UUID id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
-        ProductRS productRS = ProductRS.builder()
+/*        ProductRS productRS = ProductRS.builder()
                 .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
@@ -106,7 +108,8 @@ public class ProductService {
                 .price(product.getPrice())
                 .overallRating(product.getOverallRating())
                 .creatorId(product.getCreatorId())
-                .build();
+                .build();*/
+        ProductRS productRS = productMapper.toProductRS(product);
 
         if (product.getComments() != null) {
             productRS.setComments(product.getComments().stream().map(comment -> CommentRS.builder()

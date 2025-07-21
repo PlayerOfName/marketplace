@@ -1,10 +1,11 @@
 package org.shvetsov.controllers;
 
-import org.shvetsov.models.DTO.FilterRQ;
-import org.shvetsov.models.DTO.ProductAndCharacteristicsRQ;
-import org.shvetsov.models.DTO.ProductRQ;
-import org.shvetsov.models.DTO.ProductRS;
+import lombok.RequiredArgsConstructor;
 import org.shvetsov.models.Product;
+import org.shvetsov.requestApi.FilterRQ;
+import org.shvetsov.requestApi.ProductAndCharacteristicsRQ;
+import org.shvetsov.requestApi.ProductRQ;
+import org.shvetsov.requestApi.ProductRS;
 import org.shvetsov.service.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,18 +15,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/product")
+@RequiredArgsConstructor
 public class ProductController {
 
     private final ProductService productService;
-
-    public ProductController(ProductService productService) {
-        this.productService = productService;
-    }
-
-    @PostMapping("/create")
-    public ResponseEntity<Product> createProduct(@RequestBody ProductRQ productRQ) {
-        return ResponseEntity.ok(productService.createProduct(productRQ));
-    }
 
     @PostMapping("/create-characteristics")
     public ResponseEntity<Product> createProductAndCharacteristics(@RequestBody ProductAndCharacteristicsRQ productRQ) {

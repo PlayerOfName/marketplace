@@ -33,7 +33,7 @@ public class Comment {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @Column(name = "author_id", unique = true)
+    @Column(name = "author_id")
     private UUID authorId;
 
     @CreationTimestamp
@@ -45,5 +45,4 @@ public class Comment {
     public void updateAverageRating() {
         product.setOverallRating(BigDecimal.valueOf(product.getComments().stream().mapToInt(Comment::getRating).average().orElse(0)));
     }
-
 }

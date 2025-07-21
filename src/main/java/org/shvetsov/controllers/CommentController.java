@@ -1,7 +1,8 @@
 package org.shvetsov.controllers;
 
-import org.shvetsov.models.DTO.CommentRQ;
+import lombok.RequiredArgsConstructor;
 import org.shvetsov.models.Comment;
+import org.shvetsov.requestApi.CommentRQ;
 import org.shvetsov.service.CommentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,13 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/comment")
+@RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
-
-    public CommentController(CommentService commentService) {
-        this.commentService = commentService;
-    }
 
     @PostMapping("/create")
     public ResponseEntity<Comment> createComment(@RequestBody CommentRQ commentRQ) {
