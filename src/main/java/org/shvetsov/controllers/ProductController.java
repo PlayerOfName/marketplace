@@ -7,6 +7,9 @@ import org.shvetsov.requestApi.ProductAndCharacteristicsRQ;
 import org.shvetsov.requestApi.ProductRQ;
 import org.shvetsov.requestApi.ProductRS;
 import org.shvetsov.service.ProductService;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,7 +48,7 @@ public class ProductController {
     }
 
     @GetMapping("/getbyfilter")
-    public ResponseEntity<List<Product>> getProductByFilter(@RequestParam FilterRQ filter) {
-        return ResponseEntity.ok(productService.getProductByFilter(filter));
+    public ResponseEntity<Page<ProductRS>> getProductByFilter(@ParameterObject @ModelAttribute FilterRQ filter,@ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(productService.getFilteredProducts(filter, pageable));
     }
 }

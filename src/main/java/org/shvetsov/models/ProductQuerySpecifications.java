@@ -32,32 +32,14 @@ public class ProductQuerySpecifications {
 
     public static Specification<Product> categoryEquals(String category) {
         return (root, query, cb) ->
-                category == null ? null : cb.equal(root.get("category"), category);
-    }
-
-    public static Specification<Product> weightBetween(BigDecimal minWeight, BigDecimal maxWeight) {
-        return (root, query, cb) -> {
-            if (minWeight == null && maxWeight == null) return null;
-            Join<Product, ProductCharacteristics> specs = root.join("characteristics", JoinType.LEFT);
-            List<Predicate> predicates = new ArrayList<>();
-            if (minWeight != null) {
-                predicates.add(cb.greaterThanOrEqualTo(specs.get("weight"), minWeight));
-            }
-            if (maxWeight != null) {
-                predicates.add(cb.lessThanOrEqualTo(specs.get("weight"), maxWeight));
-            }
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
+                category == null ? null : cb.equal(root.get("categories"), category);
     }
 
     public static Specification<Product> weightEquals(BigDecimal weight) {
         return (root, query, cb) -> {
             if (weight == null) return null;
             Join<Product, ProductCharacteristics> specs = root.join("characteristics", JoinType.LEFT);
-            return cb.and(
-                    cb.equal(specs.type(), HouseholdCharacteristics.class),
-                    cb.equal(specs.get("weight"), weight)
-            );
+            return cb.equal(specs.get("weight"), weight);
         };
     }
 
@@ -65,10 +47,7 @@ public class ProductQuerySpecifications {
         return (root, query, cb) -> {
             if (height == null) return null;
             Join<Product, ProductCharacteristics> specs = root.join("characteristics", JoinType.LEFT);
-            return cb.and(
-                    cb.equal(specs.type(), HouseholdCharacteristics.class),
-                    cb.equal(specs.get("height"), height)
-            );
+            return cb.equal(specs.get("height"), height);
         };
     }
 
@@ -76,10 +55,7 @@ public class ProductQuerySpecifications {
         return (root, query, cb) -> {
             if (width == null) return null;
             Join<Product, ProductCharacteristics> specs = root.join("characteristics", JoinType.LEFT);
-            return cb.and(
-                    cb.equal(specs.type(), HouseholdCharacteristics.class),
-                    cb.equal(specs.get("width"), width)
-            );
+            return cb.equal(specs.get("width"), width);
         };
     }
 
@@ -89,21 +65,92 @@ public class ProductQuerySpecifications {
             Join<Product, ProductCharacteristics> specs = root.join("characteristics", JoinType.LEFT);
             return cb.and(
                     cb.equal(specs.type(), HouseholdCharacteristics.class),
-                    cb.equal(specs.get("roomType"), roomType)
+                    cb.equal(specs.get("room_type"), roomType)
             );
         };
     }
 
-    public static Specification<Product> hasPowerGreaterThan(Double minPower) {
+    public static Specification<Product> hasType(String type) {
         return (root, query, cb) -> {
-            if (minPower == null) return null;
+            if (type == null) return null;
+            Join<Product, ProductCharacteristics> specs = root.join("characteristics", JoinType.LEFT);
+            return cb.and(
+                    cb.equal(specs.type(), ChancelleryCharacteristics.class),
+                    cb.equal(specs.get("type"), type)
+            );
+        };
+    }
+
+    public static Specification<Product> powerBetween(Double minPower, Double maxPower) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("characteristics").get("type"), ElectronicsCharacteristics.class));
+            if (minPower != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("power"), minPower));
+            }
+            if (maxPower != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("power"), maxPower));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    public static Specification<Product> hasSize(String size) {
+        return (root, query, cb) -> {
+            if (size == null) return null;
+            Join<Product, ProductCharacteristics> specs = root.join("characteristics", JoinType.LEFT);
+            return cb.and(
+                    cb.equal(specs.type(), ClothesCharacteristics.class),
+                    cb.equal(specs.get("size"), size)
+            );
+        };
+    }
+
+    public static Specification<Product> genderEquals(String gender) {
+        return (root, query, cb) -> {
+            if (gender == null) return null;
+            Join<Product, ProductCharacteristics> specs = root.join("characteristics", JoinType.LEFT);
+            return cb.and(
+                    cb.equal(specs.type(), ClothesCharacteristics.class),
+                    cb.equal(specs.get("gender"), gender)
+            );
+        };
+    }
+
+    public static Specification<Product> materialEquals(String material) {
+        return (root, query, cb) -> {
+            if (material == null) return null;
+            Join<Product, ProductCharacteristics> specs = root.join("characteristics", JoinType.LEFT);
+            return cb.and(
+                    cb.equal(specs.type(), ClothesCharacteristics.class),
+                    cb.equal(specs.get("material"), material)
+            );
+        };
+    }
+
+    public static Specification<Product> warrantyMonthsBetween(int minWarrantyMonths, int maxWarrantyMonths) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("characteristics").get("type"), ElectronicsCharacteristics.class));
+            predicates.add(cb.greaterThanOrEqualTo(root.get("warrantyMonths"), minWarrantyMonths));
+            predicates.add(cb.lessThanOrEqualTo(root.get("warrantyMonths"), maxWarrantyMonths));
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    public static Specification<Product> remoteControlEquals(Boolean remoteControl) {
+        return (root, query, cb) -> {
+            if (remoteControl == null) return null;
             Join<Product, ProductCharacteristics> specs = root.join("characteristics", JoinType.LEFT);
             return cb.and(
                     cb.equal(specs.type(), ElectronicsCharacteristics.class),
-                    cb.greaterThanOrEqualTo(specs.get("power"), minPower)
+                    cb.equal(specs.get("remote_control"), remoteControl)
             );
         };
     }
 
-    // Аналогичные методы для других типов характеристик
+
+    // Сделать общий предикат для характеристик !
+
 }

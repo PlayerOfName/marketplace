@@ -22,12 +22,6 @@ public class CommentService {
     @Transactional
     public Comment createComment(CommentRQ commentRQ) {
         Product product = productRepository.findById(commentRQ.getProductId()).orElseThrow(() -> new RuntimeException("Product not found"));
-/*        Comment comment = Comment.builder()
-                .rating(commentRQ.getRating())
-                .text(commentRQ.getText())
-                .product(product)
-                .authorId(commentRQ.getAuthorId())
-                .build();*/
         Comment comment = commentMapper.toComment(commentRQ);
         commentRepository.save(comment);
         return comment;

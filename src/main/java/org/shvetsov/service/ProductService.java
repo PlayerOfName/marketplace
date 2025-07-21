@@ -1,6 +1,7 @@
 package org.shvetsov.service;
 
 import lombok.RequiredArgsConstructor;
+import org.shvetsov.mapper.CharacteristicsMapper;
 import org.shvetsov.mapper.ProductMapper;
 import org.shvetsov.models.Product;
 import org.shvetsov.models.ProductCharacteristics;
@@ -26,28 +27,9 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductCharacteristicsService productCharacteristicsService;
     private final ProductMapper productMapper;
+    private final CharacteristicsMapper characteristicsMapper;
 
     public Product createProductAndCharacteristics(ProductAndCharacteristicsRQ productRQ) {
-/*        Product product = Product.builder()
-                .name(productRQ.getName())
-                .description(productRQ.getDescription())
-                .price(productRQ.getPrice())
-                .categories(valueOf(productRQ.getCategories().toUpperCase()))
-                .creatorId(productRQ.getCreatorId())
-                .build();
-
-        ProductCharacteristics characteristics = switch (product.getCategories()) {
-            case ELECTRONICS -> productCharacteristicsService.createElectronicProduct(productRQ.getCharacteristics());
-            case CLOTHES -> productCharacteristicsService.createClotheProduct(productRQ.getCharacteristics());
-            case HOUSEHOLD -> productCharacteristicsService.createHouseholdProduct(productRQ.getCharacteristics());
-            case CHANCELLERY -> productCharacteristicsService.createChancelleryProduct(productRQ.getCharacteristics());
-        };
-
-        characteristics.setProduct(product);
-        product.setCharacteristics(characteristics);
-
-        productRepository.save(product);
-        return product;*/
         Product product = productMapper.toProduct(productRQ);
         ProductCharacteristics characteristics = switch (product.getCategories()) {
             case ELECTRONICS -> productCharacteristicsService.createElectronicProduct(productRQ.getCharacteristics());
@@ -59,8 +41,6 @@ public class ProductService {
         product.setCharacteristics(characteristics);
         productRepository.save(product);
         return product;
-
-        // отдольно характеристики, отдельно продукт
     }
 
     public Product updateProduct(UUID id, ProductRQ productRQ, UUID userId) {
@@ -73,19 +53,8 @@ public class ProductService {
 
     }
 
-/*    public void updateOverallRating(UUID id) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
-        List<Comment> comments = product.getComments();
-        if (!comments.isEmpty()) {
-            double averageRating = comments.stream().mapToInt(Comment::getRating).average().orElse(0.0);
-            product.setOverallRating(averageRating);
-            productRepository.save(product);
-        }
-
-    }*/
-
     public UUID deleteProduct(UUID productId, UUID userId) {
-        if (productRepository.findById(productId).get().getCreatorId() != userId) {
+        if (!productRepository.findById(productId).get().getCreatorId().equals(userId)) {
             return null;
         }
         productRepository.deleteById(productId);
@@ -100,15 +69,6 @@ public class ProductService {
 
     public ProductRS getProductWithDetails(UUID id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
-/*        ProductRS productRS = ProductRS.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .description(product.getDescription())
-                .categories(product.getCategories())
-                .price(product.getPrice())
-                .overallRating(product.getOverallRating())
-                .creatorId(product.getCreatorId())
-                .build();*/
         ProductRS productRS = productMapper.toProductRS(product);
 
         if (product.getComments() != null) {
@@ -117,17 +77,12 @@ public class ProductService {
                     .rating(comment.getRating())
                     .build()).toList());
         }
-
         if (product.getCharacteristics() != null) {
-            productRS.setCharacteristics(ProductCharacteristicsRS.builder()
-                    .weight(product.getCharacteristics().getWeight())
-                    .height(product.getCharacteristics().getHeight())
-                    .width(product.getCharacteristics().getWidth())
-                    .build());
+            CharacteristicsRS characteristics = characteristicsMapper.toCharacteristicsRS(product.getCharacteristics());
+            productRS.setCharacteristics(characteristics);
         }
 
         return productRS;
-        // изначально проверить категорию через switch или if
     }
 
     @Transactional(readOnly = true)
@@ -158,8 +113,33 @@ public class ProductService {
             spec = spec.and(ProductQuerySpecifications.heightEquals(filter.getHeight()));
         }
 
+        if (filter.getRoomType() != null) {
+            spec = spec.and(ProductQuerySpecifications.hasRoomType(filter.getRoomType()));
+        }
+        if (filter.getMinPower() != null && filter.getMaxPower() != null) {
+            spec = spec.and(ProductQuerySpecifications.powerBetween(filter.getMinPower(), filter.getMaxPower()));
+        }
+        if (filter.getMinWarrantyMonths() > 0 && filter.getMaxWarrantyMonths() > 0) {
+            spec = spec.and(ProductQuerySpecifications.warrantyMonthsBetween(filter.getMinWarrantyMonths(), filter.getMaxWarrantyMonths()));
+        }
+        if (filter.getRemoteControl() != null) {
+            spec = spec.and(ProductQuerySpecifications.remoteControlEquals(filter.getRemoteControl()));
+        }
+        if (filter.getType() != null) {
+            spec = spec.and(ProductQuerySpecifications.hasType(filter.getType()));
+        }
+        if (filter.getSize() != null) {
+            spec = spec.and(ProductQuerySpecifications.hasSize(filter.getSize()));
+        }
+        if (filter.getMaterial() != null) {
+            spec = spec.and(ProductQuerySpecifications.materialEquals(filter.getMaterial()));
+        }
+        if (filter.getGender() != null) {
+            spec = spec.and(ProductQuerySpecifications.genderEquals(filter.getGender()));
+        }
+
+
         return productRepository.findAll(spec, pageable)
                 .map(product -> productMapper.toProductRS(product));
     }
-
 }
