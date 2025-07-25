@@ -18,6 +18,7 @@ public interface ProductMapper {
     ProductCharacteristics toProductCharacteristics(ProductCharacteristicsRQ productCharacteristicsRQ);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "creatorId", ignore = true)
     void updateProduct(ProductRQ productRQ, @MappingTarget Product product);
 
     @Mapping(target = "characteristics", ignore = true)

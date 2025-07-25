@@ -6,6 +6,7 @@ import org.shvetsov.mapper.ProductMapper;
 import org.shvetsov.models.Product;
 import org.shvetsov.models.ProductCharacteristics;
 import org.shvetsov.models.ProductQuerySpecifications;
+import org.shvetsov.product.ForbiddenException;
 import org.shvetsov.product.NotFoundProductException;
 import org.shvetsov.repositories.ProductCharacteristicsRepository;
 import org.shvetsov.repositories.ProductRepository;
@@ -18,7 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.List;
@@ -48,10 +49,10 @@ public class ProductService {
     }
 
     public Product updateProduct(UUID id, ProductRQ productRQ, UUID userId) {
-        if (productRepository.findById(id).get().getCreatorId() != userId) {
-            throw new RuntimeException("You don't have permission to update this product");
+        if (!productRepository.findById(id).get().getCreatorId().equals(userId)) {
+            throw new ForbiddenException("You don't have permission to update this product");
         }
-        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        Product product = productRepository.findById(id).orElseThrow(() -> new NotFoundProductException("Product not found"));
         productMapper.updateProduct(productRQ, product);
         return productRepository.save(product);
 
@@ -59,7 +60,7 @@ public class ProductService {
 
     public UUID deleteProduct(UUID productId, UUID userId) {
         if (!productRepository.findById(productId).get().getCreatorId().equals(userId)) {
-            return null;
+            throw new ForbiddenException("You don't have permission to delete this product");
         }
         productRepository.deleteById(productId);
         return productId;
@@ -141,7 +142,6 @@ public class ProductService {
         if (filter.getGender() != null) {
             spec = spec.and(ProductQuerySpecifications.genderEquals(filter.getGender()));
         }
-
 
         return productRepository.findAll(spec, pageable)
                 .map(product -> productMapper.toProductRS(product));
