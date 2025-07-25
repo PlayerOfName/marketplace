@@ -5,11 +5,12 @@ import org.shvetsov.models.*;
 import org.shvetsov.requestApi.ProductAndCharacteristicsRQ;
 import org.shvetsov.requestApi.ProductCharacteristicsRQ;
 import org.shvetsov.requestApi.ProductRQ;
-import org.shvetsov.requestApi.ProductRS;
+import org.shvetsov.responseApi.ProductRS;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ProductMapper {
     @Mapping(target = "characteristics", ignore = true)
+    @Mapping(target = "overallRating", ignore = true)
     Product toProduct(ProductAndCharacteristicsRQ productRQ);
 
     @Mapping(target = "id", ignore = true)

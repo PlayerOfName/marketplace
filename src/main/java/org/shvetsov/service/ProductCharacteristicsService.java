@@ -16,9 +16,6 @@ public class ProductCharacteristicsService {
                 .warrantyMonths(Integer.parseInt(productCharacteristicsRQ.getSpecification().get("warrantyMonths").toString()))
                 .remoteControl(Boolean.valueOf(productCharacteristicsRQ.getSpecification().get("remoteControl").toString()))
                 .build();
-/*        specification.setPower(Double.valueOf(productCharacteristicsRQ.getSpecification().get("power").toString()));
-        specification.setWarrantyMonths(Integer.parseInt(productCharacteristicsRQ.getSpecification().get("warrantyMonths").toString()));
-        specification.setRemoteControl(Boolean.valueOf(productCharacteristicsRQ.getSpecification().get("remoteControl").toString()));*/
         return specification;
     }
 

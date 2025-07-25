@@ -18,5 +18,5 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class HouseholdCharacteristics extends ProductCharacteristics {
     @Column(name = "room_type")
-    private String roomType;
+        private String roomType;
 }

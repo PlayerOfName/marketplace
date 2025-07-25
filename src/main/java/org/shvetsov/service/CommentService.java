@@ -3,6 +3,7 @@ package org.shvetsov.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.shvetsov.comment.DuplicateCommentException;
 import org.shvetsov.mapper.CommentMapper;
 import org.shvetsov.requestApi.CommentRQ;
 import org.shvetsov.models.Comment;
@@ -16,12 +17,15 @@ import org.springframework.stereotype.Service;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final ProductRepository productRepository;
     private final CommentMapper commentMapper;
 
     @Transactional
     public Comment createComment(CommentRQ commentRQ) {
-        Product product = productRepository.findById(commentRQ.getProductId()).orElseThrow(() -> new RuntimeException("Product not found"));
+        if (commentRepository.existsByProductIdAndAuthorId(
+                commentRQ.getProductId(),
+                commentRQ.getAuthorId())) {
+            throw new DuplicateCommentException("Comment already exists");
+        }
         Comment comment = commentMapper.toComment(commentRQ);
         commentRepository.save(comment);
         return comment;

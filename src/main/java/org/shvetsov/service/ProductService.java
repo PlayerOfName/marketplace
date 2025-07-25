@@ -6,9 +6,13 @@ import org.shvetsov.mapper.ProductMapper;
 import org.shvetsov.models.Product;
 import org.shvetsov.models.ProductCharacteristics;
 import org.shvetsov.models.ProductQuerySpecifications;
+import org.shvetsov.product.NotFoundProductException;
 import org.shvetsov.repositories.ProductCharacteristicsRepository;
 import org.shvetsov.repositories.ProductRepository;
 import org.shvetsov.requestApi.*;
+import org.shvetsov.responseApi.CharacteristicsRS;
+import org.shvetsov.responseApi.CommentRS;
+import org.shvetsov.responseApi.ProductRS;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -68,7 +72,7 @@ public class ProductService {
     }
 
     public ProductRS getProductWithDetails(UUID id) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        Product product = productRepository.findById(id).orElseThrow(() -> new NotFoundProductException("Product not found"));
         ProductRS productRS = productMapper.toProductRS(product);
 
         if (product.getComments() != null) {

@@ -9,7 +9,6 @@ spring:
     hibernate:
       ddl-auto: none
       dialect: org.hibernate.dialect.PostgreSQLDialect
-
 # Общие настройки для всех профилей
 logging:
   level:

@@ -3,8 +3,8 @@ package org.shvetsov.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.shvetsov.models.*;
-import org.shvetsov.requestApi.CharacteristicsRS;
 import org.shvetsov.requestApi.ProductCharacteristicsRQ;
+import org.shvetsov.responseApi.CharacteristicsRS;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CharacteristicsMapper {

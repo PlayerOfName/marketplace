@@ -1,19 +1,18 @@
 package org.shvetsov.controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.shvetsov.models.Product;
 import org.shvetsov.requestApi.FilterRQ;
 import org.shvetsov.requestApi.ProductAndCharacteristicsRQ;
 import org.shvetsov.requestApi.ProductRQ;
-import org.shvetsov.requestApi.ProductRS;
+import org.shvetsov.responseApi.ProductRS;
 import org.shvetsov.service.ProductService;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -23,8 +22,8 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping("/create-characteristics")
-    public ResponseEntity<Product> createProductAndCharacteristics(@RequestBody ProductAndCharacteristicsRQ productRQ) {
+    @PostMapping("/create")
+    public ResponseEntity<Product> createProductAndCharacteristics(@Valid @RequestBody ProductAndCharacteristicsRQ productRQ) {
         return ResponseEntity.ok(productService.createProductAndCharacteristics(productRQ));
     }
 
@@ -48,7 +47,7 @@ public class ProductController {
     }
 
     @GetMapping("/getbyfilter")
-    public ResponseEntity<Page<ProductRS>> getProductByFilter(@ParameterObject @ModelAttribute FilterRQ filter,@ParameterObject Pageable pageable) {
+    public ResponseEntity<Page<ProductRS>> getProductByFilter(@ModelAttribute FilterRQ filter,Pageable pageable) {
         return ResponseEntity.ok(productService.getFilteredProducts(filter, pageable));
     }
 }
