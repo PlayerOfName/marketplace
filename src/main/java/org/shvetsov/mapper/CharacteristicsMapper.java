@@ -38,4 +38,48 @@ public interface CharacteristicsMapper {
 
         return builder.build();
     }
+
+    default ElectronicsCharacteristics toElectronicsCharacteristics(ProductCharacteristicsRQ productCharacteristicsRQ){
+        ElectronicsCharacteristics specification = ElectronicsCharacteristics.builder()
+                .width(productCharacteristicsRQ.getWidth())
+                .height(productCharacteristicsRQ.getHeight())
+                .weight(productCharacteristicsRQ.getWeight())
+                .power(Double.valueOf(productCharacteristicsRQ.getSpecification().get("power").toString()))
+                .warrantyMonths(Integer.parseInt(productCharacteristicsRQ.getSpecification().get("warrantyMonths").toString()))
+                .remoteControl(Boolean.valueOf(productCharacteristicsRQ.getSpecification().get("remoteControl").toString()))
+                .build();
+        return specification;
+    }
+
+    default ClothesCharacteristics toClotheCharacteristics(ProductCharacteristicsRQ productCharacteristicsRQ){
+        ClothesCharacteristics specification = ClothesCharacteristics.builder()
+                .width(productCharacteristicsRQ.getWidth())
+                .height(productCharacteristicsRQ.getHeight())
+                .weight(productCharacteristicsRQ.getWeight())
+                .size(productCharacteristicsRQ.getSpecification().get("size").toString())
+                .material(productCharacteristicsRQ.getSpecification().get("material").toString())
+                .gender(Gender.valueOf(productCharacteristicsRQ.getSpecification().get("gender").toString().toUpperCase()))
+                .build();
+        return specification;
+    }
+
+    default ChancelleryCharacteristics toChancelleryCharacteristics(ProductCharacteristicsRQ productCharacteristicsRQ){
+        ChancelleryCharacteristics specification = ChancelleryCharacteristics.builder()
+                .width(productCharacteristicsRQ.getWidth())
+                .height(productCharacteristicsRQ.getHeight())
+                .weight(productCharacteristicsRQ.getWeight())
+                .type(productCharacteristicsRQ.getSpecification().get("type").toString())
+                .build();
+        return specification;
+    }
+
+    default HouseholdCharacteristics toHouseholdCharacteristics(ProductCharacteristicsRQ productCharacteristicsRQ){
+        HouseholdCharacteristics specification = HouseholdCharacteristics.builder()
+                .width(productCharacteristicsRQ.getWidth())
+                .height(productCharacteristicsRQ.getHeight())
+                .weight(productCharacteristicsRQ.getWeight())
+                .roomType(productCharacteristicsRQ.getSpecification().get("roomType").toString())
+                .build();
+        return specification;
+    }
 }

@@ -52,6 +52,10 @@ public class Product {
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private ProductCharacteristics characteristics;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductPhoto> photos = new ArrayList<>();
+
     public void validate() {
         if (price.compareTo(BigDecimal.ZERO) <= 0) {
             throw new NotValidPriceException("Price must be greater than 0");

@@ -7,9 +7,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.shvetsov.mapper.CharacteristicsMapper;
 import org.shvetsov.mapper.ProductMapper;
+import org.shvetsov.models.ElectronicsCharacteristics;
 import org.shvetsov.models.Product;
 import org.shvetsov.models.ProductCategory;
-import org.shvetsov.models.ProductCharacteristics;
 import org.shvetsov.product.ForbiddenException;
 import org.shvetsov.product.NotFoundProductException;
 import org.shvetsov.repositories.ProductCharacteristicsRepository;
@@ -18,7 +18,6 @@ import org.shvetsov.requestApi.FilterRQ;
 import org.shvetsov.requestApi.ProductAndCharacteristicsRQ;
 import org.shvetsov.requestApi.ProductRQ;
 import org.shvetsov.responseApi.ProductRS;
-import org.shvetsov.service.ProductCharacteristicsService;
 import org.shvetsov.service.ProductService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -46,9 +45,6 @@ class ProductServiceTest {
     private ProductCharacteristicsRepository productCharacteristicsRepository;
 
     @Mock
-    private ProductCharacteristicsService productCharacteristicsService;
-
-    @Mock
     private ProductMapper productMapper;
 
     @Mock
@@ -65,10 +61,10 @@ class ProductServiceTest {
         ProductAndCharacteristicsRQ request = new ProductAndCharacteristicsRQ();
         Product product = new Product();
         product.setCategories(ProductCategory.ELECTRONICS); // Устанавливаем категорию
-        ProductCharacteristics characteristics = new ProductCharacteristics();
+        ElectronicsCharacteristics characteristics = new ElectronicsCharacteristics();
 
         when(productMapper.toProduct(any())).thenReturn(product);
-        when(productCharacteristicsService.createElectronicProduct(any())).thenReturn(characteristics);
+        when(characteristicsMapper.toElectronicsCharacteristics(any())).thenReturn(characteristics);
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
         Product result = productService.createProductAndCharacteristics(request);

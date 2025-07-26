@@ -28,19 +28,17 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ProductService {
-    private final ProductCharacteristicsRepository productCharacteristicsRepository;
     private final ProductRepository productRepository;
-    private final ProductCharacteristicsService productCharacteristicsService;
     private final ProductMapper productMapper;
     private final CharacteristicsMapper characteristicsMapper;
 
     public Product createProductAndCharacteristics(ProductAndCharacteristicsRQ productRQ) {
         Product product = productMapper.toProduct(productRQ);
         ProductCharacteristics characteristics = switch (product.getCategories()) {
-            case ELECTRONICS -> productCharacteristicsService.createElectronicProduct(productRQ.getCharacteristics());
-            case CLOTHES -> productCharacteristicsService.createClotheProduct(productRQ.getCharacteristics());
-            case HOUSEHOLD -> productCharacteristicsService.createHouseholdProduct(productRQ.getCharacteristics());
-            case CHANCELLERY -> productCharacteristicsService.createChancelleryProduct(productRQ.getCharacteristics());
+            case ELECTRONICS -> characteristicsMapper.toElectronicsCharacteristics(productRQ.getCharacteristics());
+            case CLOTHES -> characteristicsMapper.toClotheCharacteristics(productRQ.getCharacteristics());
+            case HOUSEHOLD -> characteristicsMapper.toHouseholdCharacteristics(productRQ.getCharacteristics());
+            case CHANCELLERY -> characteristicsMapper.toChancelleryCharacteristics(productRQ.getCharacteristics());
         };
         characteristics.setProduct(product);
         product.setCharacteristics(characteristics);
