@@ -49,27 +49,21 @@ public class ProductService {
     }
 
     public Product updateProduct(UUID id, ProductRQ productRQ, UUID userId) {
-        if (!productRepository.findById(id).get().getCreatorId().equals(userId)) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new NotFoundProductException("Product not found"));
+        if (!product.getCreatorId().equals(userId)) {
             throw new ForbiddenException("You don't have permission to update this product");
         }
-        Product product = productRepository.findById(id).orElseThrow(() -> new NotFoundProductException("Product not found"));
         productMapper.updateProduct(productRQ, product);
         return productRepository.save(product);
-
     }
 
     public UUID deleteProduct(UUID productId, UUID userId) {
-        if (!productRepository.findById(productId).get().getCreatorId().equals(userId)) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new NotFoundProductException("Product not found"));
+        if (!product.getCreatorId().equals(userId)) {
             throw new ForbiddenException("You don't have permission to delete this product");
         }
         productRepository.deleteById(productId);
         return productId;
-    }
-
-    public List<Product> getProductByFilter(FilterRQ filterRQ) {
-        List<Product> products = productRepository.findAll();
-
-        return products;
     }
 
     public ProductRS getProductWithDetails(UUID id) {

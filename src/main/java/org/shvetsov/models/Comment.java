@@ -31,9 +31,6 @@ public class Comment {
     @Column(name = "id")
     private UUID id;
 
-    @NotNull(message = "Rating cannot be null")
-    @Min(value = 1, message = "Rating must be at least 1")
-    @Max(value = 5, message = "Rating must be at most 5")
     @Column(name = "rating", nullable = false)
     private Integer rating;
 
@@ -41,12 +38,10 @@ public class Comment {
     @Column(name = "text", nullable = false)
     private String text;
 
-    @NotNull(message = "Product cannot be null")
     @ManyToOne(optional = false)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @NotNull(message = "AuthorId cannot be null")
     @Column(name = "author_id", nullable = false)
     private UUID authorId;
 

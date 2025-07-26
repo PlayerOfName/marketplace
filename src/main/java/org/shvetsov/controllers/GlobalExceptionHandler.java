@@ -1,6 +1,7 @@
 package org.shvetsov.controllers;
 
 import org.shvetsov.ApiError;
+import org.shvetsov.comment.DuplicateCommentException;
 import org.shvetsov.comment.NotFoundCommentException;
 import org.shvetsov.product.ForbiddenException;
 import org.shvetsov.product.NotFoundProductException;
@@ -58,5 +59,11 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 Map.of("access", "Недостаточно прав")
         );
+    }
+
+    @ExceptionHandler(DuplicateCommentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleDuplicateComment(DuplicateCommentException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
     }
 }
