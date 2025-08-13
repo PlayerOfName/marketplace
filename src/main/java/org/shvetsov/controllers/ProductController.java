@@ -1,5 +1,7 @@
 package org.shvetsov.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.shvetsov.models.Product;
@@ -10,9 +12,12 @@ import org.shvetsov.responseApi.ProductRS;
 import org.shvetsov.service.ProductService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 @RestController
@@ -22,9 +27,20 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping("/create")
-    public ResponseEntity<Product> createProductAndCharacteristics(@Valid @RequestBody ProductAndCharacteristicsRQ productRQ) {
-        return ResponseEntity.ok(productService.createProductAndCharacteristics(productRQ));
+    /*@PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Product> createProductAndCharacteristics(@Valid @RequestPart("product") ProductAndCharacteristicsRQ productRQ, @RequestPart(value = "file", required = false) MultipartFile file) {
+        return ResponseEntity.ok(productService.createProductAndCharacteristics(productRQ, file));
+    }*/
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Product> createProductAndCharacteristics(
+            @RequestPart(value = "product", required = true)
+            @Valid ProductAndCharacteristicsRQ productRQ,
+
+            @RequestPart(value = "file", required = false)
+            @Parameter(description = "Product image", content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE))
+            MultipartFile file) {
+
+        return ResponseEntity.ok(productService.createProductAndCharacteristics(productRQ, file));
     }
 
     @DeleteMapping("/delete/{productId}")

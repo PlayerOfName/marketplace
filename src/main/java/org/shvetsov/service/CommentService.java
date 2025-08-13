@@ -7,9 +7,7 @@ import org.shvetsov.comment.DuplicateCommentException;
 import org.shvetsov.mapper.CommentMapper;
 import org.shvetsov.requestApi.CommentRQ;
 import org.shvetsov.models.Comment;
-import org.shvetsov.models.Product;
 import org.shvetsov.repositories.CommentRepository;
-import org.shvetsov.repositories.ProductRepository;
 import org.springframework.stereotype.Service;
 
 @Service

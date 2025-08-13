@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "product_photos")
@@ -13,19 +14,23 @@ import java.time.LocalDateTime;
 @Builder
 public class ProductPhoto {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "UUID")
+    @Column(name = "id")
+    private UUID id;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(name = "file_name" ,nullable = false)
+    private String fileName;
 
-    @Column(nullable = false)
+    @Column(name = "path")
     private String path;
 
+    @Column(name = "size")
     private Long size;
 
+    @Column(name = "content_type")
     private String contentType;
 
+    @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;
 
     @ManyToOne(optional = false)

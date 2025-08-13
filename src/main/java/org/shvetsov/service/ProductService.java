@@ -3,6 +3,7 @@ package org.shvetsov.service;
 import lombok.RequiredArgsConstructor;
 import org.shvetsov.mapper.CharacteristicsMapper;
 import org.shvetsov.mapper.ProductMapper;
+import org.shvetsov.mapper.ProductPhotoMapperImpl;
 import org.shvetsov.models.Product;
 import org.shvetsov.models.ProductCharacteristics;
 import org.shvetsov.models.ProductQuerySpecifications;
@@ -19,9 +20,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,8 +35,10 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final CharacteristicsMapper characteristicsMapper;
+    private final ProductPhotoMapperImpl productPhotoMapperImpl;
+    private final FileStorageServiceClient fileStorageServiceClient;
 
-    public Product createProductAndCharacteristics(ProductAndCharacteristicsRQ productRQ) {
+    public Product createProductAndCharacteristics(ProductAndCharacteristicsRQ productRQ, MultipartFile files) {
         Product product = productMapper.toProduct(productRQ);
         ProductCharacteristics characteristics = switch (product.getCategories()) {
             case ELECTRONICS -> characteristicsMapper.toElectronicsCharacteristics(productRQ.getCharacteristics());
@@ -40,6 +46,10 @@ public class ProductService {
             case HOUSEHOLD -> characteristicsMapper.toHouseholdCharacteristics(productRQ.getCharacteristics());
             case CHANCELLERY -> characteristicsMapper.toChancelleryCharacteristics(productRQ.getCharacteristics());
         };
+        if (files != null) {
+            product.setPhotos(List.of(productPhotoMapperImpl.toProductPhoto(files)));
+            fileStorageServiceClient.uploadFile(product.getId(), product.getCreatorId(), files);
+        }
         characteristics.setProduct(product);
         product.setCharacteristics(characteristics);
         productRepository.save(product);
@@ -52,6 +62,19 @@ public class ProductService {
             throw new ForbiddenException("You don't have permission to update this product");
         }
         productMapper.updateProduct(productRQ, product);
+        if (productRQ.getPhoto() != null) {
+            product.setPhotos(productRQ.getPhoto().stream().map(productPhotoMapperImpl::toEntity).toList());
+        }
+        if (productRQ.getCharacteristics() != null) {
+            ProductCharacteristics characteristics = switch (product.getCategories()) {
+                case ELECTRONICS -> characteristicsMapper.toElectronicsCharacteristics(productRQ.getCharacteristics());
+                case CLOTHES -> characteristicsMapper.toClotheCharacteristics(productRQ.getCharacteristics());
+                case HOUSEHOLD -> characteristicsMapper.toHouseholdCharacteristics(productRQ.getCharacteristics());
+                case CHANCELLERY -> characteristicsMapper.toChancelleryCharacteristics(productRQ.getCharacteristics());
+            };
+            characteristics.setProduct(product);
+            product.setCharacteristics(characteristics);
+        }
         return productRepository.save(product);
     }
 
@@ -86,54 +109,20 @@ public class ProductService {
     public Page<ProductRS> getFilteredProducts(FilterRQ filter, Pageable pageable) {
         Specification<Product> spec = (root, query, cb) -> null;
 
-        // Базовые фильтры
-        if (filter.getName() != null) {
-            spec = spec.and(ProductQuerySpecifications.nameContains(filter.getName()));
-        }
-        if (filter.getMinPrice() != null || filter.getMaxPrice() != null) {
-            spec = spec.and(ProductQuerySpecifications.priceBetween(filter.getMinPrice(), filter.getMaxPrice()));
-        }
-        if (filter.getCategory() != null) {
-            spec = spec.and(ProductQuerySpecifications.categoryEquals(filter.getCategory()));
-        }
-
-        // Фильтры характеристик
-        if (filter.getWeight() != null) {
-            spec = spec.and(ProductQuerySpecifications.weightEquals(filter.getWeight()));
-        }
-
-        if (filter.getWidth() != null) {
-            spec = spec.and(ProductQuerySpecifications.widthEquals(filter.getWidth()));
-        }
-
-        if (filter.getHeight() != null) {
-            spec = spec.and(ProductQuerySpecifications.heightEquals(filter.getHeight()));
-        }
-
-        if (filter.getRoomType() != null) {
-            spec = spec.and(ProductQuerySpecifications.hasRoomType(filter.getRoomType()));
-        }
-        if (filter.getMinPower() != null && filter.getMaxPower() != null) {
-            spec = spec.and(ProductQuerySpecifications.powerBetween(filter.getMinPower(), filter.getMaxPower()));
-        }
-        if (filter.getMinWarrantyMonths() > 0 && filter.getMaxWarrantyMonths() > 0) {
-            spec = spec.and(ProductQuerySpecifications.warrantyMonthsBetween(filter.getMinWarrantyMonths(), filter.getMaxWarrantyMonths()));
-        }
-        if (filter.getRemoteControl() != null) {
-            spec = spec.and(ProductQuerySpecifications.remoteControlEquals(filter.getRemoteControl()));
-        }
-        if (filter.getType() != null) {
-            spec = spec.and(ProductQuerySpecifications.hasType(filter.getType()));
-        }
-        if (filter.getSize() != null) {
-            spec = spec.and(ProductQuerySpecifications.hasSize(filter.getSize()));
-        }
-        if (filter.getMaterial() != null) {
-            spec = spec.and(ProductQuerySpecifications.materialEquals(filter.getMaterial()));
-        }
-        if (filter.getGender() != null) {
-            spec = spec.and(ProductQuerySpecifications.genderEquals(filter.getGender()));
-        }
+            spec = spec.and(ProductQuerySpecifications.nameContains(filter.getName()))
+            .and(ProductQuerySpecifications.priceBetween(filter.getMinPrice(), filter.getMaxPrice()))
+            .and(ProductQuerySpecifications.categoryEquals(filter.getCategory()))
+            .and(ProductQuerySpecifications.weightEquals(filter.getWeight()))
+            .and(ProductQuerySpecifications.widthEquals(filter.getWidth()))
+            .and(ProductQuerySpecifications.heightEquals(filter.getHeight()))
+            .and(ProductQuerySpecifications.hasRoomType(filter.getRoomType()))
+            .and(ProductQuerySpecifications.powerBetween(filter.getMinPower(), filter.getMaxPower()))
+            .and(ProductQuerySpecifications.warrantyMonthsBetween(filter.getMinWarrantyMonths(), filter.getMaxWarrantyMonths()))
+            .and(ProductQuerySpecifications.remoteControlEquals(filter.getRemoteControl()))
+            .and(ProductQuerySpecifications.hasType(filter.getType()))
+            .and(ProductQuerySpecifications.hasSize(filter.getSize()))
+            .and(ProductQuerySpecifications.materialEquals(filter.getMaterial()))
+            .and(ProductQuerySpecifications.genderEquals(filter.getGender()));
 
         return productRepository.findAll(spec, pageable)
                 .map(product -> productMapper.toProductRS(product));
