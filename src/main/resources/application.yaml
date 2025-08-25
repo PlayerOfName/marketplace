@@ -9,6 +9,10 @@ spring:
     hibernate:
       ddl-auto: none
       dialect: org.hibernate.dialect.PostgreSQLDialect
+app:
+  photos:
+    max-per-product: 10
+
   servlet:
     multipart:
       max-file-size: 10MB
@@ -22,7 +26,6 @@ logging:
 storage:
   service:
     url: http://localhost:9090
-
 
 feign:
   client:

@@ -65,7 +65,7 @@ class ProductControllerTest {
         Product mockProduct = new Product();
         mockProduct.setId(UUID.randomUUID());
 
-        Mockito.when(productServiceWebConfig .createProductAndCharacteristics(any())).thenReturn(mockProduct);
+        //Mockito.when(productServiceWebConfig.createProductAndCharacteristics(any())).thenReturn(mockProduct);
 
         mockMvc.perform(post("/product/create")
                         .contentType(MediaType.APPLICATION_JSON)

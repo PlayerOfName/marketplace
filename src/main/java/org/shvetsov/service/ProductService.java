@@ -35,10 +35,8 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final CharacteristicsMapper characteristicsMapper;
-    private final ProductPhotoMapperImpl productPhotoMapperImpl;
-    private final FileStorageServiceClient fileStorageServiceClient;
 
-    public Product createProductAndCharacteristics(ProductAndCharacteristicsRQ productRQ, MultipartFile files) {
+    public Product createProductAndCharacteristics(ProductAndCharacteristicsRQ productRQ) {
         Product product = productMapper.toProduct(productRQ);
         ProductCharacteristics characteristics = switch (product.getCategories()) {
             case ELECTRONICS -> characteristicsMapper.toElectronicsCharacteristics(productRQ.getCharacteristics());
@@ -46,10 +44,6 @@ public class ProductService {
             case HOUSEHOLD -> characteristicsMapper.toHouseholdCharacteristics(productRQ.getCharacteristics());
             case CHANCELLERY -> characteristicsMapper.toChancelleryCharacteristics(productRQ.getCharacteristics());
         };
-        if (files != null) {
-            product.setPhotos(List.of(productPhotoMapperImpl.toProductPhoto(files)));
-            fileStorageServiceClient.uploadFile(product.getId(), product.getCreatorId(), files);
-        }
         characteristics.setProduct(product);
         product.setCharacteristics(characteristics);
         productRepository.save(product);
@@ -62,9 +56,6 @@ public class ProductService {
             throw new ForbiddenException("You don't have permission to update this product");
         }
         productMapper.updateProduct(productRQ, product);
-        if (productRQ.getPhoto() != null) {
-            product.setPhotos(productRQ.getPhoto().stream().map(productPhotoMapperImpl::toEntity).toList());
-        }
         if (productRQ.getCharacteristics() != null) {
             ProductCharacteristics characteristics = switch (product.getCategories()) {
                 case ELECTRONICS -> characteristicsMapper.toElectronicsCharacteristics(productRQ.getCharacteristics());

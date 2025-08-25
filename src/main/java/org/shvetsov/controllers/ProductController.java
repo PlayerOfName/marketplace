@@ -27,20 +27,9 @@ public class ProductController {
 
     private final ProductService productService;
 
-    /*@PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Product> createProductAndCharacteristics(@Valid @RequestPart("product") ProductAndCharacteristicsRQ productRQ, @RequestPart(value = "file", required = false) MultipartFile file) {
-        return ResponseEntity.ok(productService.createProductAndCharacteristics(productRQ, file));
-    }*/
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Product> createProductAndCharacteristics(
-            @RequestPart(value = "product", required = true)
-            @Valid ProductAndCharacteristicsRQ productRQ,
-
-            @RequestPart(value = "file", required = false)
-            @Parameter(description = "Product image", content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE))
-            MultipartFile file) {
-
-        return ResponseEntity.ok(productService.createProductAndCharacteristics(productRQ, file));
+    @PostMapping(value = "/create")
+    public ResponseEntity<Product> createProductAndCharacteristics(@RequestBody ProductAndCharacteristicsRQ productRQ) {
+        return ResponseEntity.ok(productService.createProductAndCharacteristics(productRQ));
     }
 
     @DeleteMapping("/delete/{productId}")

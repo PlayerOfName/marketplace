@@ -24,7 +24,7 @@ public class CommentService {
                 commentRQ.getAuthorId())) {
             throw new DuplicateCommentException("Comment already exists");
         }
-        Comment comment = commentMapper.toComment(commentRQ);
+        Comment comment = commentMapper.toComment(commentRQ); // Настроить comment -> commentRQ
         commentRepository.save(comment);
         return comment;
     }
